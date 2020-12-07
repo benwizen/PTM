@@ -1,13 +1,14 @@
 package command;
 
 import java.io.IOException;
+import clientConnect.ClientSocket;
 
 public class SetCommand implements Command {
 
 	@Override
 	public int doCommand(String[] args) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		ClientSocket.getClientSocket().send("set ")
 	}
 
 }

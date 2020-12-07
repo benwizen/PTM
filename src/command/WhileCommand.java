@@ -6,7 +6,8 @@ public class WhileCommand implements Command {
 
 	@Override
 	public int doCommand(String[] args) throws IOException {
-		// TODO Auto-generated method stub
+		Expression exp = args[0];
+		Commands[] commands = args[1:]
 		return 0;
 	}
 

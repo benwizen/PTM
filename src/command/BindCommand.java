@@ -1,13 +1,19 @@
 package command;
 
 import java.io.IOException;
-import interperter.Interperter;
+import variable.*;
 
 public class BindCommand implements Command {
 
 	@Override
 	public int doCommand(String[] args) throws IOException {
-		Interperter.bindsTable.put(args[1], args[3]);
+		ClientVariable clientVar = "";
+		SimulatorVariable simVar = "";
+		
+		simVar.addObserver(clientVar);
+		clientVar.addObserver(simVar);
+		simVar.setValue(clientVar.getValue());
+		
 		return 0;
 	}
 
