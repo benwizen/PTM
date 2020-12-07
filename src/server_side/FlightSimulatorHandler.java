@@ -27,7 +27,6 @@ public class FlightSimulatorHandler {
                     e.printStackTrace();
                 }
             }
-            System.out.println("FlightSimulatorHandler has stopped");
         }
         catch (NullPointerException e) {}
 	}
