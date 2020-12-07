@@ -1,9 +1,11 @@
 package test;
 
+import interperter.Interperter;
+
 public class MyInterpreter {
 
 	public static  int interpret(String[] lines){
-		// call your interpreter here
+		Interperter.parser(lines);
 		return 0;
 	}
 }
