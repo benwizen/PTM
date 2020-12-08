@@ -40,8 +40,42 @@ public class Interperter {
 
 	public static int runLine(String line) throws IOException {
 		List<String> words = lexer(line);
+		
+		while(words.contains(""))
+		{
+			words.remove("");
+		}
 		String command_id = words.get(0);
-		return getCommand(command_id).doCommand(words.stream().toArray(String[]::new));
+		String[] wordsArray = words.stream().toArray(String[]::new);
+		return getCommand(command_id).doCommand(wordsArray);
+	}
+	
+	public static int runLineWhile(String line) throws IOException {
+		List<String> words = lexer(line);
+		
+		while(words.contains(""))
+		{
+			words.remove("");
+		}
+		String command_id = words.get(0);
+		String[] wordsArray = words.stream().toArray(String[]::new);
+		if(isCommand(command_id))
+		{
+			if (command_id.equals("return")) {
+				return getCommand(command_id).doCommand(wordsArray);
+			} else {
+				getCommand(command_id).doCommand(wordsArray);
+			}
+		}
+		else {
+			if (words.contains("bind")) {
+				getCommand("bind").doCommand(wordsArray);
+			} else {
+				getCommand("assignment").doCommand(wordsArray);
+			}
+
+		}
+		return 0;
 	}
 
 	public static boolean isCommand(String word) {
@@ -65,11 +99,19 @@ public class Interperter {
 		List<String> final_words = new ArrayList<String>();
 		String[] words = str.split("\\s+");
 		for (String word : words) {
-			final_words.addAll(Arrays.asList(word.split("(?<=[-+*()/])|(?=[-+*()/])")));
+			final_words.addAll(Arrays.asList(word.split("(?<=[-+*=()/])|(?=[-+*=()/])")));
 		}
 		return final_words;
 	}
-
+	
+	public static void clearVars()
+	{
+		SimVariables.get("simX").deleteObservers();
+		SimVariables.get("simY").deleteObservers();
+		SimVariables.get("simZ").deleteObservers();
+		ClientVariables.clear();
+	}
+	
 	public static int parser(String[] lines) throws IOException {
 		int executeFlag = 1;
 		List<String> linesList = Arrays.asList(lines);
@@ -88,10 +130,10 @@ public class Interperter {
 					Command whileCommand = getCommand(command_id);
 					while (whileCommand.doCommand(wordsArray) == 1) {
 						int whileLineIndex = linesList.indexOf(line);
-						while (whileLineIndex < linesList.indexOf("}")) {
+						while (whileLineIndex < linesList.indexOf("}") - 1) {
 							whileLineIndex++;
 							String currentLine = lines[whileLineIndex];
-							runLine(currentLine);
+							runLineWhile(currentLine);
 						}
 					}
 					executeFlag = 0;
@@ -108,8 +150,8 @@ public class Interperter {
 				}
 
 			}
-
 		}
+		clearVars();
 		return 0;
 	}
 }

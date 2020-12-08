@@ -12,10 +12,12 @@ public class MySerialServer implements Server {
 	private FlightSimulatorHandler client_handler;
 	private volatile boolean stop;
 	private static Server currentServer;
+	ServerSocket server;
 	
-	public MySerialServer(int port) {
+	public MySerialServer(int port, int timeout) {
 		this.port = port;
 		this.stop = false;
+		client_handler = new FlightSimulatorHandler(timeout);
 		this.currentServer = this;
 	}
 	
@@ -31,7 +33,7 @@ public class MySerialServer implements Server {
 	public void open() {
 		try
 		{
-			ServerSocket server = new ServerSocket(port);
+			server = new ServerSocket(port);
 			server.setSoTimeout(10000);
 			
 			Socket serverSocket = null;
@@ -53,9 +55,16 @@ public class MySerialServer implements Server {
 					System.out.println("timeout");
 				}
 				finally {
-					fromClient.close();
-					toClient.close();
-					serverSocket.close();
+					if(fromClient != null)
+					{
+						fromClient.close();
+					}
+					if(toClient != null)
+						toClient.close();
+					if(serverSocket!=null)
+					{
+						serverSocket.close();
+					}
 				}
 			}
 			server.close();
@@ -74,6 +83,7 @@ public class MySerialServer implements Server {
 
 	@Override
 	public void stop() {
+		this.client_handler.stop = true;
 		this.stop = true;
 	}
 

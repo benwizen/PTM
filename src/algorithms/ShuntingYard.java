@@ -36,16 +36,17 @@ public class ShuntingYard {
         Stack<Double> operands = new Stack<>();
         Double left, right;
         for (String s : postfix) {
-            if (isDouble(s)) {
-                operands.add(Double.parseDouble(s));
-            } else {
+        	if (s.equals("+") || s.equals("-") || s.equals("*") || s.equals("/") || s.equals("^")) {
                 right = operands.pop();
                 left = operands.pop();
                 operands.push(calculate(left, right, s.charAt(0)));
-            }
+        	}
+        	else {
+                operands.add(Converter.varToNum(s));
+        	}
         }
-
         return operands.pop();
+       
     }
 
 
@@ -57,7 +58,7 @@ public class ShuntingYard {
 
         for (int i = 0; i < infix.length(); i++) {
             char currChar = infix.charAt(i);
-            if (currChar >= '0' && currChar <= '9') {
+            if (currChar >= '0' && currChar <= '9' || (currChar >='a' && currChar <= 'z') || (currChar >= 'A' && currChar <= 'Z')) {
                 last = currChar;
                 currNum.append(last);
             } else {

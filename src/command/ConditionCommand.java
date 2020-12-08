@@ -23,10 +23,8 @@ public class ConditionCommand implements Command {
         leftArgs = argsList.subList(0, indexOfEqualityPredicator);
         rightArgs = argsList.subList(indexOfEqualityPredicator + 1, argsList.size());
 
-        String[] leftNums = algorithms.Converter.expToNums(leftArgs.toArray(String[]::new));
-        String[] rightNums = algorithms.Converter.expToNums(rightArgs.toArray(String[]::new));
-        double leftValue = algorithms.ShuntingYard.evaluate(String.join("", leftNums));
-        double rightValue = algorithms.ShuntingYard.evaluate(String.join("", rightNums));
+        double leftValue = algorithms.ShuntingYard.evaluate(String.join("", leftArgs.toArray(String[]::new)));
+        double rightValue = algorithms.ShuntingYard.evaluate(String.join("", rightArgs.toArray(String[]::new)));
         
         String equalityPredicator = args[indexOfEqualityPredicator];
         switch (equalityPredicator) {

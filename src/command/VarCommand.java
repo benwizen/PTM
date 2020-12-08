@@ -18,13 +18,14 @@ public class VarCommand implements Command {
 			Interperter.putClientVariables(varName, -1.0);
 
 		else if (argsList.contains("bind"))
+		{
+			Interperter.putClientVariables(varName, -1.0);
 			Interperter.Commands.get("bind").doCommand(args);
-
+		}
 		else if (args.length > 2) {
 			int index = argsList.indexOf("=");
 			List<String> afterEqualArgs = argsList.subList(index + 1, args.length);
-			String[] nums = algorithms.Converter.expToNums(afterEqualArgs.toArray(String[]::new));
-			double value = algorithms.ShuntingYard.evaluate(String.join("", nums));
+			double value = algorithms.ShuntingYard.evaluate(String.join("", afterEqualArgs.toArray(String[]::new)));
 			Interperter.putClientVariables(varName, value);
 		}
 		return 0;

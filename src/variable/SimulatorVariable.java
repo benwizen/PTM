@@ -17,7 +17,9 @@ public class SimulatorVariable extends Variable {
 	@Override
 	public void setValue(String value) throws IOException {
 		super.setValue(value);
-		ClientSocket.getClientSocket().send(this.getSetCommand());
+		if(!ClientSocket.getClientSocket().s.isClosed())
+			ClientSocket.getClientSocket().send(this.getSetCommand());
+		
 	}
 	
 

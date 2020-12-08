@@ -21,4 +21,15 @@ public class Converter {
 		}
 		return numArray;
 	}
+	public static double varToNum(String var)
+	{
+		if(!ShuntingYard.isDouble(var) && !var.equals("+") && !var.equals("-") && !var.equals("*")&& !var.equals("/")&& !var.equals("^")&& !var.equals("(")&& !var.equals(")"))
+		{
+			return  Double.parseDouble(interperter.Interperter.ClientVariables.get(var).getValue());
+		}
+		else
+		{
+			return Double.parseDouble(var);
+		}
+	}
 }
