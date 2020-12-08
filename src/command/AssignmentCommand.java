@@ -16,7 +16,7 @@ public class AssignmentCommand implements Command {
 		List<String> argsList = Arrays.asList(args);
 		List<String> expression = argsList.subList(2, args.length);
 		
-		double value = algorithms.ShuntingYard.evaluate(String.join("", expression.toArray(String[]::new)));
+		double value = algorithms.ShuntingYard.evaluate(String.join("", Interperter.ListToArray(expression)));
 		Interperter.putClientVariables(clientVarName, value);
 		return 0;
 	}

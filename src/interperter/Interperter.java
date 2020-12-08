@@ -40,34 +40,30 @@ public class Interperter {
 
 	public static int runLine(String line) throws IOException {
 		List<String> words = lexer(line);
-		
-		while(words.contains(""))
-		{
+
+		while (words.contains("")) {
 			words.remove("");
 		}
 		String command_id = words.get(0);
 		String[] wordsArray = words.stream().toArray(String[]::new);
 		return getCommand(command_id).doCommand(wordsArray);
 	}
-	
+
 	public static int runLineWhile(String line) throws IOException {
 		List<String> words = lexer(line);
-		
-		while(words.contains(""))
-		{
+
+		while (words.contains("")) {
 			words.remove("");
 		}
 		String command_id = words.get(0);
 		String[] wordsArray = words.stream().toArray(String[]::new);
-		if(isCommand(command_id))
-		{
+		if (isCommand(command_id)) {
 			if (command_id.equals("return")) {
 				return getCommand(command_id).doCommand(wordsArray);
 			} else {
 				getCommand(command_id).doCommand(wordsArray);
 			}
-		}
-		else {
+		} else {
 			if (words.contains("bind")) {
 				getCommand("bind").doCommand(wordsArray);
 			} else {
@@ -95,6 +91,14 @@ public class Interperter {
 		ClientVariables.put(name, clientVariable);
 	}
 
+	public static String[] ListToArray(List<String> list) {
+		String[] arr = new String[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			arr[i] = list.get(i);
+		}
+		return arr;
+	}
+
 	public static List<String> lexer(String str) {
 		List<String> final_words = new ArrayList<String>();
 		String[] words = str.split("\\s+");
@@ -103,15 +107,14 @@ public class Interperter {
 		}
 		return final_words;
 	}
-	
-	public static void clearVars()
-	{
+
+	public static void clearVars() {
 		SimVariables.get("simX").deleteObservers();
 		SimVariables.get("simY").deleteObservers();
 		SimVariables.get("simZ").deleteObservers();
 		ClientVariables.clear();
 	}
-	
+
 	public static int parser(String[] lines) throws IOException {
 		int executeFlag = 1;
 		List<String> linesList = Arrays.asList(lines);

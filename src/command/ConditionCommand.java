@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import interperter.Interperter;
+
 
 public class ConditionCommand implements Command {
 
@@ -23,8 +25,8 @@ public class ConditionCommand implements Command {
         leftArgs = argsList.subList(0, indexOfEqualityPredicator);
         rightArgs = argsList.subList(indexOfEqualityPredicator + 1, argsList.size());
 
-        double leftValue = algorithms.ShuntingYard.evaluate(String.join("", leftArgs.toArray(String[]::new)));
-        double rightValue = algorithms.ShuntingYard.evaluate(String.join("", rightArgs.toArray(String[]::new)));
+        double leftValue = algorithms.ShuntingYard.evaluate(String.join("", Interperter.ListToArray(leftArgs)));
+        double rightValue = algorithms.ShuntingYard.evaluate(String.join("", Interperter.ListToArray(rightArgs)));
         
         String equalityPredicator = args[indexOfEqualityPredicator];
         switch (equalityPredicator) {

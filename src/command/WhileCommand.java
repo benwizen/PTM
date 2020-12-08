@@ -12,7 +12,7 @@ public class WhileCommand implements Command {
 	public int doCommand(String[] args) throws IOException {
 		List<String> argsList = Arrays.asList(args);
 		List<String> predicate = argsList.subList(1, args.length - 1);
-		return Interperter.Commands.get("condition").doCommand(predicate.toArray(String[]::new));
+		return Interperter.Commands.get("condition").doCommand(Interperter.ListToArray(predicate));
 	}
 
 }

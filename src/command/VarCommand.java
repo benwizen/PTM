@@ -25,7 +25,7 @@ public class VarCommand implements Command {
 		else if (args.length > 2) {
 			int index = argsList.indexOf("=");
 			List<String> afterEqualArgs = argsList.subList(index + 1, args.length);
-			double value = algorithms.ShuntingYard.evaluate(String.join("", afterEqualArgs.toArray(String[]::new)));
+			double value = algorithms.ShuntingYard.evaluate(String.join("", Interperter.ListToArray(afterEqualArgs)));
 			Interperter.putClientVariables(varName, value);
 		}
 		return 0;
