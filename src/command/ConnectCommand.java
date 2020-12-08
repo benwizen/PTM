@@ -9,7 +9,9 @@ public class ConnectCommand implements Command {
 	
 	@Override
 	public int doCommand(String[] args) throws IOException {
-		ClientSocket client = new ClientSocket(args[1], Integer.parseInt(args[2]));
+		String ip = args[1];
+		int port = Integer.parseInt(args[2]);
+		ClientSocket client = new ClientSocket(ip, port);
 		return 0;
 	}
 

@@ -10,7 +10,7 @@ public class Converter {
 		String[] numArray = new String[expression.length];
 		for(int i = 0 ; i < expression.length; i++)
 		{
-			if(!ShuntingYard.isInteger(expression[i]) && !expression[i].equals("+") && !expression[i].equals("-") && !expression[i].equals("*")&& !expression[i].equals("/")&& !expression[i].equals("^")&& !expression[i].equals("(")&& !expression[i].equals(")"))
+			if(!ShuntingYard.isDouble(expression[i]) && !expression[i].equals("+") && !expression[i].equals("-") && !expression[i].equals("*")&& !expression[i].equals("/")&& !expression[i].equals("^")&& !expression[i].equals("(")&& !expression[i].equals(")"))
 			{
 				numArray[i] = interperter.Interperter.ClientVariables.get(expression[i]).getValue();
 			}

@@ -1,14 +1,18 @@
 package command;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import interperter.Interperter;
 
 public class WhileCommand implements Command {
 
 	@Override
 	public int doCommand(String[] args) throws IOException {
-		Expression exp = args[0];
-		Commands[] commands = args[1:]
-		return 0;
+		List<String> argsList = Arrays.asList(args);
+		List<String> predicate = argsList.subList(1, args.length - 1);
+		return Interperter.Commands.get("condition").doCommand(predicate.toArray(String[]::new));
 	}
 
 }

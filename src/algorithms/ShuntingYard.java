@@ -28,15 +28,15 @@ public class ShuntingYard {
 		priorityMap.put('^', 3);
 	};
 	
-    public double evaluate(String expression) {
+    public static double evaluate(String expression) {
         return calcPostFix(convertToPostFix(expression));
     }
-    public double calcPostFix(List<String> postfix) {
+    public static double calcPostFix(List<String> postfix) {
 
         Stack<Double> operands = new Stack<>();
         Double left, right;
         for (String s : postfix) {
-            if (isInteger(s)) {
+            if (isDouble(s)) {
                 operands.add(Double.parseDouble(s));
             } else {
                 right = operands.pop();
@@ -49,7 +49,7 @@ public class ShuntingYard {
     }
 
 
-    public List<String> convertToPostFix(String infix) {
+    public static List<String> convertToPostFix(String infix) {
     	char last;
         List<String> postFix = new ArrayList<>();
         Stack<Character> opr = new Stack<>();
@@ -95,7 +95,7 @@ public class ShuntingYard {
         return postFix;
     }
     
-    protected double calculate(double left, double right, char operator) {
+    protected static double calculate(double left, double right, char operator) {
         switch (operator) {
             case '+':
                 return (new Addition(left,right)).evaluate();
@@ -111,19 +111,19 @@ public class ShuntingYard {
         return 0;
     }
     
-    public int operatorPriority(char operator) {
+    public static int operatorPriority(char operator) {
         if(priorityMap.containsKey(operator))
         	return priorityMap.get(operator);
         else
         	return 0;
     }
 
-    public static boolean isInteger(String number)
+    public static boolean isDouble(String number)
     {	
 	    try{
-	        Integer.parseInt(number);
+	        Double.parseDouble(number);
 	    }
-	    catch(Exception e ){
+	    catch(Exception e){
 	        return false;
 	    }
 	    return true;
