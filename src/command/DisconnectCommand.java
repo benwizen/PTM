@@ -11,6 +11,10 @@ public class DisconnectCommand implements Command {
 	public int doCommand(String[] args) throws IOException {
 		ClientSocket.getClientSocket().stop();
 		MySerialServer.getServer().stop();
+		while(MySerialServer.getServer().getServerThread().isAlive())
+		{
+			
+		}
 		return 0;
 	}
 

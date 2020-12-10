@@ -11,8 +11,9 @@ public class MySerialServer implements Server {
 	private int port;
 	private FlightSimulatorHandler client_handler;
 	private volatile boolean stop;
-	private static Server currentServer;
+	private static MySerialServer currentServer;
 	ServerSocket server;
+	private Thread serverThread;
 	
 	public MySerialServer(int port, int timeout) {
 		this.port = port;
@@ -21,7 +22,7 @@ public class MySerialServer implements Server {
 		this.currentServer = this;
 	}
 	
-    public synchronized static Server getServer() throws IOException {
+    public synchronized static MySerialServer getServer() throws IOException {
         if (currentServer == null)
         {
         	currentServer = null;
@@ -29,12 +30,17 @@ public class MySerialServer implements Server {
 
         return currentServer;
     }
+    public Thread getServerThread()
+    {
+    	return serverThread;
+    }
 	
 	public void open() {
 		try
 		{
 			server = new ServerSocket(port);
-			server.setSoTimeout(10000);
+			server.setReuseAddress(true);
+			server.setSoTimeout(1000);
 			
 			Socket serverSocket = null;
 			InputStream fromClient = null;
@@ -78,7 +84,8 @@ public class MySerialServer implements Server {
 	@Override
 	public void start()
 	{
-		new Thread(()->open()).start();
+		serverThread = new Thread(()->open());
+		serverThread.start();
 	}
 
 	@Override
