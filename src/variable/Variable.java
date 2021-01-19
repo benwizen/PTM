@@ -26,10 +26,11 @@ public class Variable extends Observable implements Observer {
 		this.name = name;
 	}
 	
-	public void setValue(String value) throws IOException {
+	public void setValue(String value, boolean comingFromServer) throws IOException {
 		this.value = value;
 		setChanged();
-		notifyObservers(this.value);
+		//notifyObservers(this.value);
+		notifyObservers(comingFromServer);
 	}
 	
 	
@@ -38,7 +39,7 @@ public class Variable extends Observable implements Observer {
 			Variable otherVariable = (Variable) o;
 			if (this.value != otherVariable.getValue()) {
 				try {
-					this.setValue(otherVariable.getValue());
+					this.setValue(otherVariable.getValue(), (boolean) arg);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

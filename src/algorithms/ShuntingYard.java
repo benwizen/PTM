@@ -1,6 +1,7 @@
 package algorithms;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -15,21 +16,23 @@ import command.OpenDataServerCommand;
 import command.ReturnCommand;
 import command.VarCommand;
 import command.WhileCommand;
+import interperter.Interperter;
 
 
 public class ShuntingYard {
 	public static HashMap<Character, Integer> priorityMap;
 	static { 
 		priorityMap = new HashMap<Character, Integer>();
+		priorityMap.put('(', 0);
+		priorityMap.put(')', 0);
 		priorityMap.put('+', 1);
 		priorityMap.put('-', 1);
 		priorityMap.put('*', 2);
 		priorityMap.put('/', 2);
-		priorityMap.put('^', 3);
 	};
 	
     public static double evaluate(String expression) {
-        return calcPostFix(convertToPostFix(expression));
+        return calcPostFix(convertToPostFix(expression.split(" ")));
     }
     public static double calcPostFix(List<String> postfix) {
 
@@ -38,6 +41,9 @@ public class ShuntingYard {
         for (String s : postfix) {
         	if (s.equals("+") || s.equals("-") || s.equals("*") || s.equals("/") || s.equals("^")) {
                 right = operands.pop();
+                if(operands.isEmpty()) {
+                	return calculate(0.0, right, s.charAt(0));
+                }
                 left = operands.pop();
                 operands.push(calculate(left, right, s.charAt(0)));
         	}
@@ -48,67 +54,77 @@ public class ShuntingYard {
         return operands.pop();
        
     }
-
-
-    public static List<String> convertToPostFix(String infix) {
-    	char last;
-        List<String> postFix = new ArrayList<>();
-        Stack<Character> opr = new Stack<>();
-        StringBuilder currNum = new StringBuilder();
-
-        for (int i = 0; i < infix.length(); i++) {
-            char currChar = infix.charAt(i);
-            if (currChar >= '0' && currChar <= '9' || (currChar >='a' && currChar <= 'z') || (currChar >= 'A' && currChar <= 'Z')) {
-                last = currChar;
-                currNum.append(last);
-            } else {
-                if (currNum.length() > 0) {
-                    postFix.add(currNum.toString());
-                    currNum = new StringBuilder();
+    
+	public static List<String> convertToPostFix(String[] exp) {
+        Stack<String> s = new Stack<String>();
+        String postfix = ""; 
+        for (int i=0;i<exp.length;i++){                 
+        	if (!isOperandOrClientVar(exp[i]) && !(exp[i].compareTo(")") == 0)){                 
+                while (!s.empty() && !s.peek().equals("(") && compareToPirority(s.peek(), exp[i])){
+		                    postfix += " " + s.peek(); 
+		                    s.pop();
                 }
-                if (currChar == '+' || currChar == '-' || currChar == '*' || currChar == '/' || currChar == '^') {
-                    while (!opr.empty() && operatorPriority(currChar) <= operatorPriority(opr.lastElement())) {
-                        postFix.add(opr.pop().toString());
-                    }
-                    opr.add(currChar);
-
-                } else if (currChar == '(') {
-                    opr.add(currChar);
-
-                } else if (currChar == ')') {
-                    while (!opr.empty() && opr.lastElement() != '(') {
-                        postFix.add(opr.pop().toString());
-                    }
-                    opr.pop();
-                }
+                s.push(exp[i]);
             }
-
+            else if (isOperandOrClientVar(exp[i])) {
+                postfix += " " + exp[i];
+            }
+            else if (exp[i].compareTo(")") == 0){
+                while (!s.empty() && !s.peek().equals("(")){
+                    postfix += " " + s.peek(); s.pop();
+                }
+                s.pop();
+            }
         }
-
-        if (currNum.length() > 0) {
-            postFix.add(currNum.toString());
+        while (!s.empty()){
+            postfix += " " + s.peek(); s.pop();
         }
+        return Arrays.asList(postfix.toString().replaceFirst(" ", "").split(" "));                                             
+    }
+   
+ 
+    public static boolean isOperandOrClientVar(String operand){
+    	try
+    	{
+    	  Float.parseFloat(operand);
+    	  return true;
+    	}
+    	catch(NumberFormatException e)
+    	{
+    		if(Interperter.ClientVariables.get(operand)!=null) {
+    			return true;
+    		}
+    		return false;
+    	}
+    }
 
-        while (!opr.empty()) {
-            postFix.add(opr.pop().toString());
+    public static boolean compareToPirority(String operand1, String operand2){
+        int operand1Priority = getOperatorPriority(operand1);
+        int operand2Priority = getOperatorPriority(operand2);
+        if ((operand1Priority == operand2Priority) && (operand1Priority != 3)){
+            return true;
+        }else if ((operand1Priority == 3) && (operand2Priority == 3)) {
+        	return false;
         }
+        return operand1Priority > operand2Priority ? true : false;
+    }
 
-        return postFix;
+    public static int getOperatorPriority(String operand){
+        int weight = -1;
+        if(priorityMap.get(operand.charAt(0)) != null)
+        	weight = priorityMap.get(operand.charAt(0));
+        return weight;
     }
     
-    protected static double calculate(double left, double right, char operator) {
-        switch (operator) {
-            case '+':
+    protected static double calculate(Double left, Double right, char operator) {
+    	if(operator == '+')
                 return (new Addition(left,right)).evaluate();
-            case '-':
+    	if(operator == '-')
                 return (new Reduction(left,right)).evaluate();
-            case '*':
+    	if(operator == '*')
                 return (new Multplication(left,right)).evaluate();
-            case '/':
+    	if(operator == '/')
                 return (new Division(left,right)).evaluate();
-            case '^':
-                return Math.pow(left, right);
-        }
         return 0;
     }
     

@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.*;
 
 import clientConnect.ClientSocket;
+import command.OpenDataServerCommand;
 
 import java.io.*;
 
@@ -13,9 +14,11 @@ public class MySerialServer implements Server {
 	private volatile boolean stop;
 	private static MySerialServer currentServer;
 	ServerSocket server;
+	OpenDataServerCommand dataServer;
 	private Thread serverThread;
 	
-	public MySerialServer(int port, int timeout) {
+	public MySerialServer(int port, int timeout, OpenDataServerCommand dataServer) {
+		this.dataServer = dataServer;
 		this.port = port;
 		this.stop = false;
 		client_handler = new FlightSimulatorHandler(timeout);
@@ -40,7 +43,7 @@ public class MySerialServer implements Server {
 		{
 			server = new ServerSocket(port);
 			server.setReuseAddress(true);
-			server.setSoTimeout(1000);
+			//server.setSoTimeout(10000);
 			
 			Socket serverSocket = null;
 			InputStream fromClient = null;
@@ -51,6 +54,7 @@ public class MySerialServer implements Server {
 				try {
 					serverSocket = server.accept();
 					System.out.println("connected");
+					dataServer.connected = true;
 					fromClient = serverSocket.getInputStream();
 					toClient = serverSocket.getOutputStream();
 					client_handler.handleClient(fromClient, toClient);
@@ -59,6 +63,7 @@ public class MySerialServer implements Server {
 				catch(SocketTimeoutException e)
 				{
 					System.out.println("timeout");
+					this.stop = true;
 				}
 				finally {
 					if(fromClient != null)

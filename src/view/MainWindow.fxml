@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.MainWindowController">
+   <children>
+      <Circle fx:id="outerCircle" fill="DODGERBLUE" layoutX="846.0" layoutY="300.0" radius="100.0" stroke="BLACK" strokeType="INSIDE" />
+      <Circle fx:id="innerCircle" fill="#051e36" layoutX="846.0" layoutY="300.0" onMouseDragged="#dragged" onMouseReleased="#released" radius="26.0" stroke="BLACK" strokeType="INSIDE" />
+      <RadioButton fx:id="manualRb" layoutX="809.0" layoutY="68.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="114.0" selected="true" text="Manual">
+         <toggleGroup>
+            <ToggleGroup fx:id="rbGroup" />
+         </toggleGroup>
+      </RadioButton>
+      <Slider fx:id="rudderSlider" blockIncrement="0.2" layoutX="769.0" layoutY="441.0" majorTickUnit="0.2" max="1.0" min="-1.0" onMouseDragged="#rudderDrag" prefHeight="24.0" prefWidth="154.0" showTickLabels="true" showTickMarks="true" />
+      <Text layoutX="826.0" layoutY="498.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Rudder" />
+      <Slider fx:id="throttleSlider" blockIncrement="0.2" layoutX="707.0" layoutY="230.0" majorTickUnit="0.2" max="1.0" onMouseDragged="#throttleDrag" orientation="VERTICAL" prefHeight="160.0" prefWidth="16.0" showTickLabels="true" showTickMarks="true" />
+      <Text layoutX="687.0" layoutY="205.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Throttle" />
+      <Button fx:id="connectBtn" layoutX="27.0" layoutY="64.0" mnemonicParsing="false" onMouseClicked="#connectClicked" text="Connect" />
+      <Button fx:id="loadDataBtn" layoutX="100.0" layoutY="64.0" mnemonicParsing="false" onMouseClicked="#loadDataClicked" text="Load Data" />
+      <Button fx:id="calcBtn" disable="true" layoutX="182.0" layoutY="64.0" mnemonicParsing="false" onMouseClicked="#calculatePathBtn" text="Calculate Path" />
+      <RadioButton fx:id="autopilotRb" disable="true" layoutX="491.0" layoutY="68.0" mnemonicParsing="false" onMouseClicked="#autopilotSelected" text="Autopilot" toggleGroup="$rbGroup" />
+      <Button fx:id="loadFileBtn" layoutX="491.0" layoutY="91.0" mnemonicParsing="false" onMouseClicked="#loadFileClicked" prefHeight="27.0" prefWidth="74.0" text="Load File" />
+      <TextArea fx:id="fileTxt" layoutX="428.0" layoutY="174.0" prefHeight="364.0" prefWidth="247.0" />
+      <Text layoutX="47.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Client Connection Status : " />
+      <Text fx:id="connectionStatusTxt" fill="#eb0000" layoutX="193.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Disconnected" />
+      <StackPane fx:id="mapPane" layoutX="29.0" layoutY="173.0" prefHeight="300.0" prefWidth="390.0">
+         <children>
+            <Canvas fx:id="mapCanvas" height="300.0" width="390.0" />
+            <Canvas fx:id="airplaneCanvas" height="300.0" width="390.0" />
+            <Canvas fx:id="selectedLocationCanvas" height="300.0" onMouseClicked="#locationClicked" width="390.0" />
+         </children>
+      </StackPane>
+   </children>
+</AnchorPane>

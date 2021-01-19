@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane fx:id="popupPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="192.0" prefWidth="352.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.ConnectPopup">
+   <children>
+      <Button fx:id="connectBtn" layoutX="149.0" layoutY="120.0" mnemonicParsing="false" onMouseClicked="#connect" text="Connect" />
+      <TextField fx:id="ipTxt" layoutX="53.0" layoutY="69.0" />
+      <TextField fx:id="portTxt" layoutX="235.0" layoutY="69.0" prefHeight="27.0" prefWidth="65.0" />
+      <Text layoutX="164.0" layoutY="53.0" strokeType="OUTSIDE" strokeWidth="0.0" text="IP:Port" />
+      <Text layoutX="222.0" layoutY="87.0" strokeType="OUTSIDE" strokeWidth="0.0" text=":" />
+   </children>
+</AnchorPane>

@@ -7,17 +7,44 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 import variable.*;
 
 public class Interperter {
 
 	public static HashMap<String, ClientVariable> ClientVariables = new HashMap<String, ClientVariable>();
+	public static final String lineSeperator = "\r\n";
 	public static final HashMap<String, SimulatorVariable> SimVariables;
 	static {
-		SimVariables = new HashMap<String, SimulatorVariable>();
-		SimVariables.put("simX", new SimulatorVariable("simX", ""));
-		SimVariables.put("simY", new SimulatorVariable("simY", ""));
-		SimVariables.put("simZ", new SimulatorVariable("simZ", ""));
+		SimVariables = new LinkedHashMap<String, SimulatorVariable>();
+		SimVariables.put("/instrumentation/airspeed-indicator/indicated-speed-kt", new SimulatorVariable("/instrumentation/airspeed-indicator/indicated-speed-kt",""));
+		SimVariables.put("/instrumentation/altimeter/indicated-altitude-ft", new SimulatorVariable("/instrumentation/altimeter/indicated-altitude-ft",""));
+		SimVariables.put("/instrumentation/altimeter/pressure-alt-ft", new SimulatorVariable("/instrumentation/altimeter/pressure-alt-ft",""));
+		SimVariables.put("/instrumentation/attitude-indicator/indicated-pitch-deg", new SimulatorVariable("/instrumentation/attitude-indicator/indicated-pitch-deg",""));
+		SimVariables.put("/instrumentation/attitude-indicator/indicated-roll-deg", new SimulatorVariable("/instrumentation/attitude-indicator/indicated-roll-deg",""));
+		SimVariables.put("/instrumentation/attitude-indicator/internal-pitch-deg", new SimulatorVariable("/instrumentation/attitude-indicator/internal-pitch-deg",""));
+		SimVariables.put("/instrumentation/attitude-indicator/internal-roll-deg", new SimulatorVariable("/instrumentation/attitude-indicator/internal-roll-deg",""));
+		SimVariables.put("/instrumentation/encoder/indicated-altitude-ft", new SimulatorVariable("/instrumentation/encoder/indicated-altitude-ft",""));
+		SimVariables.put("/instrumentation/encoder/pressure-alt-ft", new SimulatorVariable("/instrumentation/encoder/pressure-alt-ft",""));
+		SimVariables.put("/instrumentation/gps/indicated-altitude-ft", new SimulatorVariable("/instrumentation/gps/indicated-altitude-ft",""));
+		SimVariables.put("/instrumentation/gps/indicated-ground-speed-kt", new SimulatorVariable("/instrumentation/gps/indicated-ground-speed-kt",""));
+		SimVariables.put("/instrumentation/gps/indicated-vertical-speed", new SimulatorVariable("/instrumentation/gps/indicated-vertical-speed",""));
+		SimVariables.put("/instrumentation/heading-indicator/indicated-heading-deg", new SimulatorVariable("/instrumentation/heading-indicator/indicated-heading-deg",""));
+		SimVariables.put("/instrumentation/magnetic-compass/indicated-heading-deg", new SimulatorVariable("/instrumentation/magnetic-compass/indicated-heading-deg",""));
+		SimVariables.put("/instrumentation/slip-skid-ball/indicated-slip-skid", new SimulatorVariable("/instrumentation/slip-skid-ball/indicated-slip-skid",""));
+		SimVariables.put("/instrumentation/turn-indicator/indicated-turn-rate", new SimulatorVariable("/instrumentation/turn-indicator/indicated-turn-rate",""));
+		SimVariables.put("/instrumentation/vertical-speed-indicator/indicated-speed-fpm", new SimulatorVariable("/instrumentation/vertical-speed-indicator/indicated-speed-fpm",""));
+		SimVariables.put("/controls/flight/aileron", new SimulatorVariable("/controls/flight/aileron",""));
+		SimVariables.put("/controls/flight/elevator", new SimulatorVariable("/controls/flight/elevator",""));
+		SimVariables.put("/controls/flight/rudder", new SimulatorVariable("/controls/flight/rudder",""));
+		SimVariables.put("/controls/flight/flaps", new SimulatorVariable("/controls/flight/flaps",""));
+		SimVariables.put("/controls/engines/current-engine/throttle", new SimulatorVariable("/controls/engines/current-engine/throttle",""));
+		SimVariables.put("/engines/engine/rpm", new SimulatorVariable("/engines/engine/rpm",""));
+		SimVariables.put("/controls/flight/speedbrake", new SimulatorVariable("/controls/flight/speedbrake",""));
+		SimVariables.put("/instrumentation/heading-indicator/offset-deg", new SimulatorVariable("/instrumentation/heading-indicator/offset-deg",""));
+		SimVariables.put("/position/longitude-deg/", new SimulatorVariable("/position/longitude-deg/",""));
+		SimVariables.put("/position/latitude-deg/", new SimulatorVariable("/position/latitude-deg/",""));
 	};
 
 	public static HashMap<String, Command> Commands;
@@ -32,6 +59,8 @@ public class Interperter {
 		Commands.put("return", new ReturnCommand());
 		Commands.put("disconnect", new DisconnectCommand());
 		Commands.put("condition", new ConditionCommand());
+		Commands.put("sleep", new SleepCommand());
+		Commands.put("print", new PrintCommand());
 	};
 
 	public static Command getCommand(String command_id) {
@@ -66,7 +95,14 @@ public class Interperter {
 		} else {
 			if (words.contains("bind")) {
 				getCommand("bind").doCommand(wordsArray);
-			} else {
+			}
+			else if(words.contains("print")) {
+				getCommand("print").doCommand(wordsArray);
+			}
+			else if(words.contains("sleep")) {
+				getCommand("sleep").doCommand(wordsArray);
+			}
+			else {
 				getCommand("assignment").doCommand(wordsArray);
 			}
 
@@ -84,7 +120,7 @@ public class Interperter {
 
 		if (ClientVariables.containsKey(name)) {
 			clientVariable = ClientVariables.get(name);
-			clientVariable.setValue(valueStr);
+			clientVariable.setValue(valueStr, false);
 		} else {
 			clientVariable = new ClientVariable(name, valueStr);
 		}
@@ -109,9 +145,9 @@ public class Interperter {
 	}
 
 	public static void clearVars() {
-		SimVariables.get("simX").deleteObservers();
-		SimVariables.get("simY").deleteObservers();
-		SimVariables.get("simZ").deleteObservers();
+		for(SimulatorVariable s : SimVariables.values()) {
+			s.deleteObservers();
+		}
 		ClientVariables.clear();
 	}
 
