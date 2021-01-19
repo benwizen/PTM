@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Text?>
+<?import view.FlightMap?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.MainWindowController">
    <children>
@@ -32,12 +33,6 @@
       <TextArea fx:id="fileTxt" layoutX="428.0" layoutY="174.0" prefHeight="364.0" prefWidth="247.0" />
       <Text layoutX="47.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Client Connection Status : " />
       <Text fx:id="connectionStatusTxt" fill="#eb0000" layoutX="193.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Disconnected" />
-      <StackPane fx:id="mapPane" layoutX="29.0" layoutY="173.0" prefHeight="300.0" prefWidth="390.0">
-         <children>
-            <Canvas fx:id="mapCanvas" height="300.0" width="390.0" />
-            <Canvas fx:id="airplaneCanvas" height="300.0" width="390.0" />
-            <Canvas fx:id="selectedLocationCanvas" height="300.0" onMouseClicked="#locationClicked" width="390.0" />
-         </children>
-      </StackPane>
+      <FlightMap fx:id="flightMapInstance" layoutX="29.0" layoutY="173.0" prefHeight="300.0" prefWidth="390.0" />
    </children>
 </AnchorPane>

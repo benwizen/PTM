@@ -57,7 +57,6 @@ public class Model extends Observable{
 						String[] lines = script.split(System.getProperty("line.separator"));
 						Interperter.parser(lines);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 			}).start();
@@ -78,8 +77,8 @@ public class Model extends Observable{
 						
 						planeX = Double.valueOf(Interperter.SimVariables.get("/position/longitude-deg/").getValue());
 						planeY = Double.valueOf(Interperter.SimVariables.get("/position/latitude-deg/").getValue());
-						normalizedCanvasX = (planeX - startPlaneLocX) * cubicSize / cellWidth;
-						normalizedCanvasY = -((planeY - startPlaneLocY) * cubicSize / cellHeight);
+						normalizedCanvasX = Math.abs(((planeX) - startPlaneLocX) * cubicSize / cellWidth) * cellWidth * 50;
+						normalizedCanvasY = Math.abs(((planeY) - startPlaneLocY) * cubicSize / cellHeight) * cellHeight * 50;
 						setChanged();
 						notifyObservers("coordinates");
 						Thread.sleep(250);
@@ -89,8 +88,8 @@ public class Model extends Observable{
 			}).start();
 		}
 
-		public void calculatePathBtn(double lastClickedX, double lastClickedY, int[][] mapHeightsMat) throws UnknownHostException, IOException, InterruptedException {
-			Socket clientSocket = new Socket("127.0.0.1", 10000);
+		public void calculatePathBtn(String calcIp, String calcPort, double lastClickedX, double lastClickedY, int[][] mapHeightsMat) throws UnknownHostException, IOException, InterruptedException {
+			Socket clientSocket = new Socket(calcIp, Integer.valueOf(calcPort));
 			PrintWriter clientPrinter = new PrintWriter(clientSocket.getOutputStream());
 			for(int i = 0; i<mapHeightsMat.length; i++) {
 				String row = Arrays.stream(mapHeightsMat[i]).mapToObj(String::valueOf).collect(Collectors.joining(","));
@@ -99,13 +98,14 @@ public class Model extends Observable{
 			}
 			clientPrinter.print("end" + Interperter.lineSeperator);
 			clientPrinter.flush();
-			clientPrinter.print((int) (normalizedCanvasY) + "," + (int) (normalizedCanvasX) + Interperter.lineSeperator);
+			clientPrinter.print(((int) (normalizedCanvasY)) + "," + ((int) (normalizedCanvasX)) + Interperter.lineSeperator);
 			clientPrinter.flush();
-			clientPrinter.print((int)(lastClickedY/cellHeight) + "," + (int)(lastClickedX/cellWidth) + Interperter.lineSeperator);
+			clientPrinter.print(((int)(lastClickedY/cellHeight)) + "," + ((int)(lastClickedX/cellWidth)) + Interperter.lineSeperator);
 			clientPrinter.flush();
 			BufferedReader in=new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			while((pathDirections = in.readLine()) == null) {
 				Thread.sleep(250);
+				break;
 			}
 			clientSocket.close();
 			setChanged();

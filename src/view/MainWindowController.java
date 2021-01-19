@@ -17,6 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.rmi.dgc.VMID;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -67,15 +71,18 @@ public class MainWindowController extends Observable{
 	private Button calcBtn;
 	@FXML
 	private RadioButton autopilotRb;
-
 	@FXML
 	private Canvas mapCanvas;
 	@FXML
 	private Canvas selectedLocationCanvas;
 	@FXML
 	private Canvas airplaneCanvas;
-	private int[][] mapHeightsArr;
-	private double lastClickedX = 0, lastClickedY = 0;
+	private static int[][] mapHeightsArr;
+	private DoubleProperty lastClickedX;
+	private DoubleProperty lastClickedY;
+	private DoubleProperty joystickDragX;
+	private DoubleProperty joystickDragY;
+	private StringProperty sliderType;
 	private static double startPlaneLocX, startPlaneLocY;
 	private double cubicSize;
 	private double boundsX = 0, boundsY = 0;
@@ -83,35 +90,78 @@ public class MainWindowController extends Observable{
 	private static double cellHeight = 0;
 	private static double lastPlaneX = 0;
 	private static double lastPlaneY = 0;
-    private static Image airplaneImage;
-    private Image selectedLocationImage = new Image("file:resources/selectedLocation.png");
-    private static GraphicsContext airplaneGc;
+	private static String calcIp;
+	private static String calcPort;
+	private boolean mapDrawn = false;
+	@FXML
+	private FlightMap flightMapInstance;
     private GraphicsContext locationContext;
 	public void setConnectionTxt(String txt, Color color) {
 		connectionStatusTxt.setText(txt);
 		connectionStatusTxt.setFill(color);
 	}
-	private ArrayList<String[]> parseCsv(File csvFile) throws IOException{
-		List<String> lines = Files.readAllLines(csvFile.toPath());
-		ArrayList<String[]> csvFileSplitted = new ArrayList<String[]>();
-		for(String line : lines) {
-			csvFileSplitted.add(line.split(","));
-		}
-		return csvFileSplitted;
-	}
+
 	@FXML
 	private void initialize() {
-		airplaneImage = new Image("file:resources/airplane.png");
+		lastClickedX = new SimpleDoubleProperty();
+		lastClickedY = new SimpleDoubleProperty();
+		joystickDragX = new SimpleDoubleProperty();
+		joystickDragY = new SimpleDoubleProperty();
+		sliderType = new SimpleStringProperty();
 		Image innerImg = new Image("file:resources/joystick-blue.png");
 		Image outerImg = new Image("file:resources/joystick-base.png");
 		innerCircle.setFill(new ImagePattern(innerImg, 0, 0, 1, 1, true));
 		outerCircle.setFill(new ImagePattern(outerImg, 0, 0, 1, 1, true));
 	}
+	
+	public TextArea getFileTxt() {
+		return fileTxt;
+	}
+
+	public static int[][] getMapHeightsArr() {
+		return mapHeightsArr;
+	}
+
+	public static void setMapHeightsArr(int[][] mapHeightsArr) {
+		MainWindowController.mapHeightsArr = mapHeightsArr;
+	}
+
+	public Slider getThrottleSlider() {
+		return throttleSlider;
+	}
+
+	public Slider getRudderSlider() {
+		return rudderSlider;
+	}
+
+	public DoubleProperty getJoystickDragX() {
+		return joystickDragX;
+	}
+
+	public DoubleProperty getJoystickDragY() {
+		return joystickDragY;
+	}
+	
+
+	public StringProperty getSliderType() {
+		return sliderType;
+	}
+
 	private boolean checkConnection() throws IOException {
     	if(!Main.vm.checkConnection()) {
     		Alert errorAlert = new Alert(AlertType.ERROR);
     		errorAlert.setHeaderText("Connection Error");
     		errorAlert.setContentText("Not connected to server");
+    		errorAlert.showAndWait();
+    		return false;
+    	}
+    	return true;
+	}
+	private boolean checkManual() throws IOException {
+    	if(!manualRb.isSelected()) {
+    		Alert errorAlert = new Alert(AlertType.ERROR);
+    		errorAlert.setHeaderText("Manual mode not selected");
+    		errorAlert.setContentText("Toggle Manual Mode");
     		errorAlert.showAndWait();
     		return false;
     	}
@@ -135,7 +185,14 @@ public class MainWindowController extends Observable{
 	}
     @FXML
     private void autopilotSelected() throws IOException {
-    	Main.vm.interpretAutoPilot(fileTxt.getText());
+    	Main.vm.interpretAutoPilot();
+    }
+    
+    public void redrawAirplane(double x, double y) {
+    	if(this.mapDrawn) {
+    		flightMapInstance.redrawAirplane(x,y);
+    	}
+    	
     }
     @FXML
     private void loadDataClicked() throws IOException {
@@ -144,56 +201,15 @@ public class MainWindowController extends Observable{
         if(file != null) {
         	calcBtn.setDisable(false);
         }
-        ArrayList<String[]> parsedCsv = parseCsv(file);
-        startPlaneLocX = Double.valueOf(parsedCsv.get(0)[0]);
-        startPlaneLocY = Double.valueOf(parsedCsv.get(0)[1]);
-        cubicSize = Double.valueOf(parsedCsv.get(1)[0]);
-        
-        int size = parsedCsv.get(2).length;
-        
-        int k = 0;
-        int[][] mapHeights = new int[parsedCsv.size()][parsedCsv.get(2).length];
-        for(int i = 2; i < (parsedCsv.size()); i++, k++) {
-        	for(int j = 0; j < parsedCsv.get(2).length; j++) {
-        		mapHeights[k][j] = Integer.parseInt(parsedCsv.get(i)[j]);
-        	}
-        }
-        
-        mapHeightsArr = mapHeights;
-        
-        double CanvasHeight = mapCanvas.getHeight();
-        double CanvasWidth = mapCanvas.getWidth();
-        cellHeight = CanvasHeight / mapHeights.length;
-        cellWidth = CanvasWidth / mapHeights[0].length;
-        
-        GraphicsContext mapGc = mapCanvas.getGraphicsContext2D();
-        airplaneGc = airplaneCanvas.getGraphicsContext2D();
-        
-        int minHeight = Integer.MAX_VALUE;
-        int maxHeight = 0;
-        
-        for(int i = 0 ; i < mapHeights.length;i++) {
-        	for(int j = 0 ; j < mapHeights[0].length; j++) {
-        		if(mapHeights[i][j] > maxHeight)
-        			maxHeight = mapHeights[i][j];
-        		if(mapHeights[i][j] < minHeight)
-        			minHeight = mapHeights[i][j];
-        	}
-        }
-        
-        
-        
-        for (int i = 0; i < mapHeights.length; i++) {
-            for (int j = 0; j < mapHeights[0].length; j++) {
-                int height = mapHeights[i][j];
-                double normalizedHeight = 255*(((double)height - (double)minHeight)/((double)maxHeight - (double)minHeight));
-                int redColor = (255 - (int)normalizedHeight);
-                int greenColor = (int)normalizedHeight;
-                mapGc.setFill(Color.rgb(redColor, greenColor, 0));
-                mapGc.fillRect((j * cellWidth), (i * cellHeight), cellWidth, cellHeight);
-            }
-        }
-        Main.vm.mapLoaded(startPlaneLocX, startPlaneLocY, cubicSize, cellHeight, cellWidth);
+        mapDrawn = true;
+        flightMapInstance.drawMap(file);
+        lastClickedX.bind(flightMapInstance.getLastClickedX());
+        lastClickedY.bind(flightMapInstance.getLastClickedY());
+        Main.vm.mapLoaded(flightMapInstance.getStartPlaneLocX().getValue(),
+        				  flightMapInstance.getStartPlaneLocY().getValue(), 
+        				  flightMapInstance.getCubicSize().getValue(), 
+        				  flightMapInstance.getCellHeight().getValue(),
+        				  flightMapInstance.getCellWidth().getValue());
         
         
     }
@@ -215,26 +231,41 @@ public class MainWindowController extends Observable{
     public Canvas getMapCanvas() {
     	return this.mapCanvas;
     }
-    @FXML
-    private void locationClicked(MouseEvent me) {
-    	lastClickedX = me.getX() - 10;
-    	lastClickedY = me.getY() - 10;
-    	locationContext = selectedLocationCanvas.getGraphicsContext2D();
-    	locationContext.clearRect(0, 0, locationContext.getCanvas().getWidth(), locationContext.getCanvas().getHeight());
-    	locationContext.drawImage(selectedLocationImage, lastClickedX, lastClickedY, 30, 30);
-    }
-    @FXML
+	public static void setCalcIp(String calcIp) {
+		MainWindowController.calcIp = calcIp;
+	}
+
+	public static void setCalcPort(String calcPort) {
+		MainWindowController.calcPort = calcPort;
+	}
+	
+    public static String getCalcIp() {
+		return calcIp;
+	}
+
+	public static String getCalcPort() {
+		return calcPort;
+	}
+
+	@FXML
     private void calculatePathBtn() throws UnknownHostException, IOException, InterruptedException {
-    	Main.vm.calculatePathBtn(lastClickedX, lastClickedY, mapHeightsArr);
-    }
-    public static void redrawAirplane(double x, double y) {
-    	lastPlaneX = x;
-    	lastPlaneY = y;
-    	airplaneGc.clearRect(0, 0, airplaneGc.getCanvas().getWidth(), airplaneGc.getCanvas().getHeight());
-    	airplaneGc.drawImage(airplaneImage, x / cellWidth, y / cellHeight,30 ,30);
+        Stage popupSave = new Stage();
+        popupSave.setResizable(false);
+        popupSave.initModality(Modality.APPLICATION_MODAL);
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("ConnectSolverPopup.fxml"));
+        Parent root = loader.load();
+        ConnectSolverPopup controller = loader.getController();
+        Scene scene = new Scene(root);
+        popupSave.setScene(scene);
+        popupSave.showAndWait();
+    	Main.vm.calculatePathBtn(calcIp, calcPort, lastClickedX.getValue(), lastClickedY.getValue(), mapHeightsArr);
     }
     @FXML
     private void dragged(MouseEvent me) throws IOException {
+    	if(!checkManual()) {
+    		return;
+    	}
     	if(!checkConnection()) {
     		return;
     	}
@@ -249,8 +280,9 @@ public class MainWindowController extends Observable{
     		boundsY = mouseY;
     		innerCircle.setCenterX(mouseX);
     		innerCircle.setCenterY(mouseY);
-    		Point2D draggedPoint = new Point2D(mouseX / (outerCircle.getRadius()),mouseY / (outerCircle.getRadius()));
-    		Main.vm.dragJoystick(draggedPoint);
+    		joystickDragX.setValue(mouseX / (outerCircle.getRadius()));
+    		joystickDragY.setValue(mouseY / (outerCircle.getRadius()));
+    		Main.vm.dragJoystick();
     	}
     	
     }
@@ -258,64 +290,48 @@ public class MainWindowController extends Observable{
     private void released(MouseEvent me) throws IOException{
 		innerCircle.setCenterX(0);
 		innerCircle.setCenterY(0);
-		Main.vm.dragJoystick(new Point2D(0,0));
+		joystickDragX.setValue(0);
+		joystickDragY.setValue(0);
+		Main.vm.dragJoystick();
     	
     }
     @FXML
     private void throttleDrag() throws IOException {
+    	if(!checkManual()) {
+    		return;
+    	}
     	if(!checkConnection()) {
     		return;
     	}
-    	Main.vm.sliderDrag(throttleSlider.getValue(), "throttle");
+    	sliderType.setValue("throttle");
+    	Main.vm.sliderDrag();
     }
     @FXML
     private void rudderDrag() throws IOException {
+    	if(!checkManual()) {
+    		return;
+    	}
     	if(!checkConnection()) {
     		return;
     	}
-    	Main.vm.sliderDrag(rudderSlider.getValue(), "rudder");
+    	sliderType.setValue("rudder");
+    	Main.vm.sliderDrag();
+    }
+    public void drawPath(String[] path) {
+    	if(flightMapInstance != null)
+    		flightMapInstance.drawPath(path);
     }
     @FXML
     private void connectClicked() throws IOException {
         Stage popupSave = new Stage();
         popupSave.setResizable(false);
         popupSave.initModality(Modality.APPLICATION_MODAL);
-
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("ConnectPopup.fxml"));
         Parent root = loader.load();
-
         ConnectPopup controller = loader.getController();
-
         Scene scene = new Scene(root);
         popupSave.setScene(scene);
         popupSave.showAndWait();
     }
-	public void drawPath(String[] path) {
-		locationContext.clearRect(0, 0,locationContext.getCanvas().getWidth(), locationContext.getCanvas().getHeight());
-		double xPlane =  (lastPlaneX / cellWidth) + (8*cellWidth);
-		double yPlane = (lastPlaneY / cellHeight) + (15*cellHeight);
-		locationContext.beginPath();
-		locationContext.moveTo(xPlane, yPlane);
-		
-		for(String direction : path) {
-			if(direction.equals("Up")) {
-				yPlane = yPlane - cellHeight;
-			}
-			else if(direction.equals("Down")) {
-				yPlane = yPlane + cellHeight;
-			}
-			else if(direction.equals("Left")) {
-				xPlane = xPlane + cellWidth;
-			}
-			else if(direction.equals("Right")) {
-				xPlane = xPlane + cellWidth;
-			}
-			locationContext.lineTo(xPlane, yPlane);
-		}
-		locationContext.stroke();
-		locationContext.closePath();
-		locationContext.drawImage(selectedLocationImage, lastClickedX, lastClickedY, 30, 30);
-		
-	}
 }
