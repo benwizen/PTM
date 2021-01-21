@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,11 +25,9 @@ import javafx.scene.paint.Color;
 
 public class FlightMap extends StackPane{
 
-	
-	private final Image airplaneImage = new Image("file:resources/airplane.png");
-	private final Image innerImg = new Image("file:resources/joystick-blue.png");
-	private final Image outerImg = new Image("file:resources/joystick-base.png");
-    private final Image selectedLocationImage = new Image("file:resources/selectedLocation.png");
+	private double diff = 0.016;
+	private final Image airplaneImage = new Image(getClass().getResourceAsStream("airplane.png"));
+    private final Image selectedLocationImage = new Image(getClass().getResourceAsStream("selectedLocation.png"));
 	private Canvas mapCanvas;
 	private Canvas airplaneCanvas;
 	private Canvas selectedLocationCanvas;
@@ -128,7 +128,6 @@ public class FlightMap extends StackPane{
         	lastPlaneX.setValue(x);
         	lastPlaneY.setValue(y);
         	airplaneGc.clearRect(0, 0, airplaneGc.getCanvas().getWidth(), airplaneGc.getCanvas().getHeight());
-        	System.out.println("x: " + lastPlaneX.getValue() + " y: " +lastPlaneY.getValue());
         	airplaneGc.drawImage(airplaneImage, lastPlaneX.getValue(), lastPlaneY.getValue(),30 ,30);
     	}
 
@@ -150,8 +149,8 @@ public class FlightMap extends StackPane{
     }
 	public void drawPath(String[] path) {
 		locationGc.clearRect(0, 0,locationGc.getCanvas().getWidth(), locationGc.getCanvas().getHeight());
-		double xPlane =  (lastPlaneX.getValue() / cellWidth.getValue()) + (19*cellWidth.getValue());
-		double yPlane = (lastPlaneY.getValue() / cellHeight.getValue()) + (24*cellHeight.getValue());
+		double xPlane =  (lastPlaneX.getValue() / cellWidth.getValue()) + (10*cellWidth.getValue());
+		double yPlane = (lastPlaneY.getValue() / cellHeight.getValue()) + (15*cellHeight.getValue());
 		locationGc.beginPath();
 		locationGc.moveTo(xPlane, yPlane);
 		
@@ -172,7 +171,7 @@ public class FlightMap extends StackPane{
 		}
 		locationGc.stroke();
 		locationGc.closePath();
-		locationGc.drawImage(selectedLocationImage, lastClickedX.getValue(), lastClickedY.getValue(), 30, 30);
+		locationGc.drawImage(selectedLocationImage, lastClickedX.getValue(), lastClickedY.getValue() - 10, 30, 30);
 		
 	}
 	public void drawMap(File mapFile) throws IOException {

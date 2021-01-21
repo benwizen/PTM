@@ -77,8 +77,8 @@ public class Model extends Observable{
 						
 						planeX = Double.valueOf(Interperter.SimVariables.get("/position/longitude-deg/").getValue());
 						planeY = Double.valueOf(Interperter.SimVariables.get("/position/latitude-deg/").getValue());
-						normalizedCanvasX = Math.abs(((planeX) - startPlaneLocX) * cubicSize / cellWidth) * cellWidth * 50;
-						normalizedCanvasY = Math.abs(((planeY) - startPlaneLocY) * cubicSize / cellHeight) * cellHeight * 50;
+						this.normalizedCanvasX = Math.abs(((planeX) - (startPlaneLocX * 1)) * cubicSize * 10000 / cellWidth) * cellWidth;
+						this.normalizedCanvasY = Math.abs(((planeY) - (startPlaneLocY * 1)) * cubicSize * 10000/ cellHeight) * cellHeight;
 						setChanged();
 						notifyObservers("coordinates");
 						Thread.sleep(250);

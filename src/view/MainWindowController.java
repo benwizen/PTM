@@ -108,8 +108,8 @@ public class MainWindowController extends Observable{
 		joystickDragX = new SimpleDoubleProperty();
 		joystickDragY = new SimpleDoubleProperty();
 		sliderType = new SimpleStringProperty();
-		Image innerImg = new Image("file:resources/joystick-blue.png");
-		Image outerImg = new Image("file:resources/joystick-base.png");
+		Image innerImg = new Image(getClass().getResourceAsStream("joystick-blue.png"));
+		Image outerImg = new Image(getClass().getResourceAsStream("joystick-base.png"));
 		innerCircle.setFill(new ImagePattern(innerImg, 0, 0, 1, 1, true));
 		outerCircle.setFill(new ImagePattern(outerImg, 0, 0, 1, 1, true));
 	}
